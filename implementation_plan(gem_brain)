@@ -1,0 +1,54 @@
+# Full-Stack Implementation Plan for handii.co
+
+Upgrade the static `handii-react` store into a full-stack, craft-aesthetic e-commerce platform with a dynamic Admin CMS, User Authentication, Order Processing, and an interactive 3D Keychain Bag customizer—while **100% preserving the handcrafted paper-and-thread aesthetic**.
+
+## User Review Required
+
+> [!IMPORTANT]
+> - The implementation is divided into 6 sequential phases as outlined below and in [IMPLEMENTATION_ROADMAP.md](file:///d:/handii-react/handii-react/IMPLEMENTATION_ROADMAP.md).
+> - Backend will run on Node.js + Express alongside Vite frontend with SQLite/MongoDB database and Multer image uploads.
+> - The handcrafted visual design system (`--cream`, `--paper`, `--ink`, `--gold`, `--rose`, `Fraunces`, `Caveat`) will be strictly preserved across all new admin portals, auth modals, and 3D scenes.
+
+## Proposed Implementation Order
+
+### Phase 1: Backend Server, Database Schema & Catalog Seeding
+- Setup Express server with CORS, JSON body parser, and Multer file storage in `server/`.
+- Create database schemas: `User`, `Product`, `Order`, `Reel`, `Content`.
+- Migration script to seed ~138 products from `products.js` into the database.
+- REST API routes: `/api/products`, `/api/reels`, `/api/upload`.
+
+### Phase 2: User & Admin Authentication
+- JWT auth endpoints: `register`, `login`, `me`, `address`.
+- Frontend `AuthContext.jsx` with token persistence.
+- Friendly, dismissible landing welcome popup + mandatory checkout auth gate.
+- "My Orders" (`🧾`) access in header.
+
+### Phase 3: Admin Dashboard & Dynamic CMS (`/admin`)
+- Secure admin login and route guard.
+- Analytics & KPI overview: Total Revenue, Pending Orders, Completed Orders, Low Stock.
+- Order Manager: Filter orders, view customer info/swatches, update statuses, direct WhatsApp button.
+- Product CRUD: Add/edit items, color swatch builder, drag-and-drop image uploader.
+- Instagram Reels Manager: Dynamic URL and thumbnail updater without touching code.
+
+### Phase 4: Cart Checkout & Live Order Tracking
+- Multi-step checkout drawer: Bag Review ➔ Identity ➔ Delivery Address ➔ Payment/WhatsApp.
+- Customer "My Orders" tracking stepper: `Received` ➔ `Coiling 🧵` ➔ `Resin Curing ✨` ➔ `Dispatched 🚚` ➔ `Delivered 🌸`.
+
+### Phase 5: Interactive 3D Bag Customizer (Three.js)
+- Three.js / `@react-three/fiber` 3D Canvas with Tote/Canvas Bag model and orbit controls.
+- Interactive charm rack: snap catalog keychains onto bag straps with sway physics.
+- Color variations and "Add Styled Bag & Charms to Cart".
+
+### Phase 6: Value-Add Features, Custom Bouquet Builder & Polish
+- Interactive Bouquet Builder: assemble custom flower stems, wrapping paper, and ribbons.
+- Customer photo reviews ("Wall of Love").
+- Cross-device responsive QA and context synchronization in [CODEBASE_CONTEXT.md](file:///d:/handii-react/handii-react/CODEBASE_CONTEXT.md).
+
+## Verification Plan
+### Automated & Build Tests
+- Backend API route integration tests.
+- `npm run build` validation for React frontend.
+### Manual Verification
+- Test user registration and checkout flow.
+- Test admin product creation with photo upload and verify live appearance on the storefront.
+- Test 3D bag rendering and charm attachment in the browser.

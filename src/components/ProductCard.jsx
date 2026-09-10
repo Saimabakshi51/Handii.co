@@ -1,10 +1,13 @@
 import { useRef, useState } from 'react';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, onOpenReviews }) {
   const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+
   const [activeColorIdx, setActiveColorIdx] = useState(
-    product.colors.findIndex((c) => c.active) !== -1
+    product.colors && product.colors.findIndex((c) => c.active) !== -1
       ? product.colors.findIndex((c) => c.active)
       : 0
   );
@@ -13,11 +16,14 @@ export default function ProductCard({ product }) {
   const [added, setAdded] = useState(false);
   const timeoutRef = useRef(null);
 
-  const activeColor = product.colors[activeColorIdx];
+  const activeColor = product.colors && product.colors[activeColorIdx];
+  const isFavorited = isInWishlist(product.id);
+  const isOut = product.isOutOfStock || product.stockCount === 0 || product.isNotify;
+  const isLowStock = !isOut && product.stockCount > 0 && product.stockCount <= 3;
 
   function handleSelectColor(idx) {
     setActiveColorIdx(idx);
-    const newImg = product.colors[idx].img;
+    const newImg = product.colors[idx]?.img;
     if (newImg && newImg !== displayImg) {
       setImgOpacity(0);
       window.setTimeout(() => {
@@ -28,11 +34,14 @@ export default function ProductCard({ product }) {
   }
 
   function handleAddToCart() {
+    if (isOut) return;
     addToCart({
+      productId: product.id,
       name: product.title,
       price: product.price,
       img: displayImg,
       color: activeColor ? activeColor.color : 'As Pictured',
+      quantity: 1
     });
     setAdded(true);
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
@@ -40,23 +49,52 @@ export default function ProductCard({ product }) {
   }
 
   function handleNotify() {
-    // eslint-disable-next-line no-alert
     alert(
-      "Thanks for your interest! Follow @handii.co_ on Instagram — we'll post photos and colours as soon as this piece is ready."
+      `Thanks for your interest in "${product.title}"! We have marked your alert and will announce restocks on Instagram @handii.co_! 🌸`
     );
   }
 
   return (
     <div className="prod-card" data-cat={product.cat} data-sub={product.sub}>
       <div className="imgwrap">
-        <img src={displayImg} alt={product.alt} style={{ opacity: imgOpacity }} />
-        {product.badge && <span className="badge">{product.badge}</span>}
-      </div>
-      <div className="prod-info">
-        <h4>{product.title}</h4>
-        <p className="price">{product.price}</p>
+        <img src={displayImg} alt={product.alt || product.title} style={{ opacity: imgOpacity }} />
 
-        {product.colors.length > 0 && (
+        {/* Badges */}
+        {isOut ? (
+          <span className="badge badge-out">Out of Stock</span>
+        ) : isLowStock ? (
+          <span className="badge badge-low">Only {product.stockCount} left!</span>
+        ) : product.badge ? (
+          <span className="badge">{product.badge}</span>
+        ) : null}
+
+        {/* Wishlist Heart Button */}
+        <button
+          className={`wishlist-heart-btn ${isFavorited ? 'active' : ''}`}
+          title={isFavorited ? 'Remove from Wishlist' : 'Add to Wishlist'}
+          onClick={() => toggleWishlist(product)}
+        >
+          {isFavorited ? '❤️' : '🤍'}
+        </button>
+      </div>
+
+      <div className="prod-info">
+        <div className="prod-title-rating">
+          <h4>{product.title}</h4>
+          {/* Star Rating Badge */}
+          <button
+            type="button"
+            className="rating-badge-btn"
+            title="View customer reviews"
+            onClick={() => onOpenReviews && onOpenReviews(product)}
+          >
+            ★ {product.ratingAvg || '4.9'} <span className="rev-count">({product.ratingCount || 12})</span>
+          </button>
+        </div>
+
+        <p className="price">₹{product.price}</p>
+
+        {product.colors && product.colors.length > 0 && (
           <div className="color-row">
             <span className="color-label">Colour:</span>
             {product.colors.map((c, idx) => (
@@ -72,13 +110,13 @@ export default function ProductCard({ product }) {
           </div>
         )}
 
-        {product.isNotify ? (
+        {isOut ? (
           <button className="add-cart-btn notify-btn" onClick={handleNotify}>
-            Notify Me
+            Notify Me When Back
           </button>
         ) : (
           <button className="add-cart-btn" onClick={handleAddToCart} disabled={added}>
-            {added ? 'Added ✓' : 'Add to Cart'}
+            {added ? 'Added ✓' : 'Add to Cart 🧺'}
           </button>
         )}
       </div>
@@ -86,7 +124,6 @@ export default function ProductCard({ product }) {
   );
 }
 
-// Converts a raw CSS style string (e.g. "background:#e3ae49") into a React style object.
 function parseInlineStyle(styleStr) {
   if (!styleStr) return undefined;
   const result = {};

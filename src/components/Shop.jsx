@@ -1,18 +1,40 @@
-import { forwardRef, useMemo } from 'react';
-import { products } from '../data/products';
+import { forwardRef, useMemo, useState, useEffect } from 'react';
+import { products as initialStaticProducts } from '../data/products';
 import { mainTabs, subcatMap } from '../data/subcategories';
 import ProductCard from './ProductCard';
 
-const Shop = forwardRef(function Shop({ currentCat, currentSub, onSelectCat, onSelectSub }, ref) {
+const Shop = forwardRef(function Shop(
+  { currentCat, currentSub, onSelectCat, onSelectSub, onOpenReviews },
+  ref
+) {
+  const [productList, setProductList] = useState(initialStaticProducts);
+  const [inStockFilter, setInStockFilter] = useState(false);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch('/api/products');
+        const data = await res.json();
+        if (data.success && data.products && data.products.length > 0) {
+          setProductList(data.products);
+        }
+      } catch (err) {
+        console.warn('Using local catalog fallback for shop.');
+      }
+    }
+    fetchProducts();
+  }, []);
+
   const subTabs = subcatMap[currentCat] || [];
 
   const visibleProducts = useMemo(() => {
-    return products.filter((p) => {
+    return productList.filter((p) => {
       const matchCat = currentCat === 'all' || p.cat === currentCat;
       const matchSub = currentSub === 'all' || p.sub === currentSub;
-      return matchCat && matchSub;
+      const matchStock = !inStockFilter || (!p.isOutOfStock && (p.stockCount === undefined || p.stockCount > 0));
+      return matchCat && matchSub && matchStock;
     });
-  }, [currentCat, currentSub]);
+  }, [productList, currentCat, currentSub, inStockFilter]);
 
   return (
     <section className="section" id="shop" style={{ paddingTop: 0 }} ref={ref}>
@@ -23,16 +45,29 @@ const Shop = forwardRef(function Shop({ currentCat, currentSub, onSelectCat, onS
           <p>Tap a craft to filter, then use the pills below to zoom into exactly what you're after.</p>
         </div>
 
-        <div className="shop-tabs">
-          {mainTabs.map((t) => (
-            <button
-              key={t.cat}
-              className={'main-tab' + (currentCat === t.cat ? ' active' : '')}
-              onClick={() => onSelectCat(t.cat)}
-            >
-              {t.label}
-            </button>
-          ))}
+        <div className="shop-controls-bar">
+          <div className="shop-tabs">
+            {mainTabs.map((t) => (
+              <button
+                key={t.cat}
+                className={'main-tab' + (currentCat === t.cat ? ' active' : '')}
+                onClick={() => onSelectCat(t.cat)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="stock-filter-toggle">
+            <label>
+              <input
+                type="checkbox"
+                checked={inStockFilter}
+                onChange={(e) => setInStockFilter(e.target.checked)}
+              />
+              <span>In-Stock Only 🌸</span>
+            </label>
+          </div>
         </div>
 
         <div className="sub-tabs">
@@ -50,14 +85,14 @@ const Shop = forwardRef(function Shop({ currentCat, currentSub, onSelectCat, onS
 
         <div className="prod-grid">
           {visibleProducts.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p.id} product={p} onOpenReviews={onOpenReviews} />
           ))}
         </div>
 
         {visibleProducts.length === 0 && (
           <div className="empty-state">
             <span className="tag">nothing here yet</span>
-            No pieces in this category just yet — check back soon or DM us on Instagram for custom orders.
+            No pieces in this category just yet — check back soon or DM us for custom orders.
           </div>
         )}
       </div>
