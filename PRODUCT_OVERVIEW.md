@@ -230,4 +230,4 @@ It is built to feel personal, warm, and true to the handmade nature of the brand
 ---
 
 handii.co — Handmade with love, powered by technology.
-Contact: WhatsApp +91 8847277218  |  Instagram @handii.co
+Contact: Instagram @handii.co  |  Email: handii.co@yahoo.com

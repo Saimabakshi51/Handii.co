@@ -131,8 +131,12 @@ export default function CartDrawer({ onOrderSuccess }) {
             '\n'
           )}\n\n*Total Payable:* ₹${data.order.totalAmount}\n\nLooking forward to confirmation! ✨`;
 
-          const phone = '918847277218';
-          window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+          const phone = import.meta.env.VITE_WHATSAPP_NUMBER || '';
+          if (phone) {
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+          } else {
+            window.open('https://www.instagram.com/handii.co/', '_blank');
+          }
         }
 
         if (onOrderSuccess) onOrderSuccess(data.order);

@@ -243,8 +243,12 @@ export function CartProvider({ children }) {
       message += `*Estimated Total:* ₹${total}\n\n`;
       message += `Please confirm order availability and dispatch timeline! ✨`;
 
-      const phone = '918847277218';
-      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+      const phone = import.meta.env.VITE_WHATSAPP_NUMBER || '';
+      if (phone) {
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+      } else {
+        window.open('https://www.instagram.com/handii.co/', '_blank');
+      }
     },
     [cart, subtotal, coupon, discountAmount, total]
   );

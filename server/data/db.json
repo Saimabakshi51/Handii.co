@@ -106,7 +106,7 @@
       "email": "saimabakshi512@gmail.com",
       "name": "saima",
       "passwordHash": "$2b$10$NxQThs7Jc9uMV8gXcFxnK.2Yfa7FMmJuaxo//i0gwhU9FTW/DqfbO",
-      "phone": "8847277218",
+      "phone": "",
       "role": "user",
       "savedCart": [],
       "updatedAt": "2026-10-02T19:38:18.704Z"
@@ -2539,7 +2539,7 @@
       "createdAt": "2026-10-02T19:36:26.165Z",
       "customerEmail": "saimabakshi512@gmail.com",
       "customerName": "saima",
-      "customerPhone": "8847277218",
+      "customerPhone": "9999999999",
       "discountAmount": 0,
       "items": [
         {
@@ -2654,7 +2654,7 @@
       "customText": "saima",
       "customerEmail": "saimabakshi512@gmail.com",
       "customerName": "saima",
-      "customerPhone": "8847277218",
+      "customerPhone": "",
       "declineReason": "",
       "estimatedDays": null,
       "quoteNotes": "",
@@ -3109,6 +3109,6 @@
     "currency": "INR",
     "currencySymbol": "₹",
     "shopName": "handii.co",
-    "phone": "919876543210"
+    "phone": ""
   }
 }

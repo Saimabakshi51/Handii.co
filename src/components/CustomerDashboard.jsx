@@ -279,14 +279,12 @@ export default function CustomerDashboard({ isOpen, onClose }) {
                           Total: <strong>₹{ord.totalAmount}</strong>
                         </span>
                         <a
-                          href={`https://wa.me/918847277218?text=${encodeURIComponent(
-                            `Hi Handii Studio! 🌸 Inquiring regarding my order #${ord.orderNumber}`
-                          )}`}
+                          href="https://www.instagram.com/handii.co/"
                           target="_blank"
                           rel="noreferrer"
                           className="btn-whatsapp-track"
                         >
-                          Chat about Order 💬
+                          Chat on Instagram 💬
                         </a>
                       </div>
                     </div>

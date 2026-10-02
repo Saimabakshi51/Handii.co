@@ -587,7 +587,7 @@ Default Settings:
 - `currency`: "INR"
 - `currencySymbol`: "Rs."
 - `shopName`: "handii.co"
-- `phone`: "918847277218"
+- `phone`: ""
 
 ---
 
@@ -1163,4 +1163,4 @@ MongoDB updated in background within milliseconds
 ---
 
 *Generated: September 2026 | handii.co Studio*
-*WhatsApp: +91 8847277218 | Instagram: @handii.co_*
+*Instagram: @handii.co | Email: handii.co@yahoo.com*

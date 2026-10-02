@@ -322,14 +322,13 @@ export default function CustomerDashboardPage() {
                         Total Amount: <strong>₹{ord.totalAmount}</strong>
                       </span>
                       <a
-                        href={`https://wa.me/918847277218?text=${encodeURIComponent(
-                          `Hi Handii Studio! 🌸 Inquiring regarding my order #${ord.orderNumber}`
-                        )}`}
+                        href="https://www.instagram.com/handii.co/"
                         target="_blank"
                         rel="noreferrer"
                         className="btn-whatsapp-track"
+                        style={{ background: 'linear-gradient(45deg, #f09433, #dc2743, #bc1888)' }}
                       >
-                        Chat about Order 💬
+                        Ask on Instagram 🌸
                       </a>
                     </div>
                   </div>

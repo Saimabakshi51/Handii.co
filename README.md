@@ -34,7 +34,7 @@ The platform runs as a modern, decoupled full-stack application with 24/7 cloud 
 * **Frontend**: Hosted on **Netlify** with Single Page Application routing and automated API reverse-proxying.
 * **Backend API**: Hosted on **Render.com** ([https://handii-co.onrender.com](https://handii-co.onrender.com)).
 * **Database**: Hosted on **MongoDB Atlas** cloud cluster with automated schema fallback and live synchronization.
-* **Official Socials**: Instagram [@handii.co](https://www.instagram.com/handii.co/) • WhatsApp +91 8847277218.
+* **Official Socials**: Instagram [@handii.co](https://www.instagram.com/handii.co/) • Email [handii.co@yahoo.com](mailto:handii.co@yahoo.com).
 
 ---
 
@@ -165,7 +165,6 @@ Because both local development and the live website share the same **MongoDB Atl
 ## 💌 Contact & Studio Inquiries
 
 * **Instagram**: [@handii.co](https://www.instagram.com/handii.co/)
-* **WhatsApp Hotline**: [+91 8847277218](https://wa.me/918847277218)
 * **Email**: [handii.co@yahoo.com](mailto:handii.co@yahoo.com)
 
 *Handcrafted in India with warm paper tones, cotton thread, and real botanicals.*

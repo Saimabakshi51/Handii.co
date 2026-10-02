@@ -65,19 +65,19 @@ function getWelcomeHtml() {
       <div class="coupon-box">
         <span style="font-size: 13px; text-transform: uppercase; color: #5c7175; font-weight: 600;">Your Welcome Gift Voucher</span><br>
         <div class="coupon-code">WELCOME10</div>
-        <p style="margin: 8px 0 0; font-size: 12px; color: #5c7175;">Apply at checkout or mention in WhatsApp order.</p>
+        <p style="margin: 8px 0 0; font-size: 12px; color: #5c7175;">Apply at checkout or connect with us on Instagram.</p>
       </div>
 
       <div style="text-align: center; margin-top: 25px;">
-        <a href="https://wa.me/918847277218?text=Hi%20Handii%20Studio!%20%F0%9F%8C%B8%20I%20just%20subscribed%20and%20would%20like%20to%20order%20with%20code%20WELCOME10!" class="cta-btn">
-          💬 Chat Directly With Our Artisan
+        <a href="https://www.instagram.com/handii.co/" class="cta-btn">
+          💬 Chat With Our Artisan on Instagram
         </a>
       </div>
     </div>
 
     <div class="footer">
       <p style="margin: 0 0 6px 0;">Need a bespoke flower bouquet or personalized alphabet charm?</p>
-      <p style="margin: 0;">WhatsApp: <a href="https://wa.me/918847277218" class="wa-link">+91 8847277218</a> • Studio Instagram: <a href="https://www.instagram.com/handii.co/" style="color:#c4707a;">@handii.co</a></p>
+      <p style="margin: 0;">Studio Instagram: <a href="https://www.instagram.com/handii.co/" style="color:#c4707a;">@handii.co</a> • Email: <a href="mailto:handii.co@yahoo.com" style="color:#c4707a;">handii.co@yahoo.com</a></p>
       <p style="margin: 10px 0 0; font-size: 11px; opacity: 0.7;">© 2026 handii.co Handmade Factory, India.</p>
     </div>
   </div>

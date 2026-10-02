@@ -51,18 +51,18 @@ export default function Contact() {
         </span>
         <h2>Connect With Our Studio 🌸</h2>
         <p>
-          Have a custom bouquet request, bulk gifting inquiry, or question about your order? Chat directly with our artisan on WhatsApp (+91 8847277218) or subscribe for early restock alerts!
+          Have a custom bouquet request, bulk gifting inquiry, or question about your order? Chat directly with our artisan on Instagram @handii.co or subscribe for early restock alerts!
         </p>
 
         <div className="contact-action-row" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', margin: '20px 0' }}>
           <a
-            href="https://wa.me/918847277218?text=Hi%20Handii%20Studio!%20%F0%9F%8C%B8%20I'd%20like%20to%20inquire%20about%20your%20handcrafted%20pieces%20or%20custom%20order."
+            href="https://www.instagram.com/handii.co/"
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-primary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', fontSize: '1rem', background: '#25D366', color: '#fff', border: 'none', boxShadow: '0 6px 20px rgba(37,211,102,0.35)' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', fontSize: '1rem', background: 'linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888)', color: '#fff', border: 'none', boxShadow: '0 6px 20px rgba(225,48,108,0.35)' }}
           >
-            💬 Chat on WhatsApp (+91 8847277218)
+            🌸 Direct Message on Instagram @handii.co
           </a>
         </div>
 

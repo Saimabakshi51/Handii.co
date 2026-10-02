@@ -34,7 +34,7 @@ const initialData = {
     currency: 'INR',
     currencySymbol: '₹',
     shopName: 'handii.co',
-    phone: '918847277218'
+    phone: ''
   }
 };
 
