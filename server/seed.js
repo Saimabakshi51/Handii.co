@@ -26,7 +26,7 @@ export async function seedDatabase() {
           street: '42 Craft Lane, Studio 3B',
           city: 'Mumbai',
           state: 'Maharashtra',
-          pincode: '14',
+          pincode: '400050',
           isDefault: true
         }
       ]

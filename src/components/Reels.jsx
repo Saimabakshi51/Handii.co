@@ -19,7 +19,16 @@ export default function Reels() {
                 </div>
               ) : (
                 <>
-                  <img src={r.img} alt={r.alt} className="reel-cover" />
+                  <img
+                    src={r.img}
+                    alt={r.alt}
+                    className="reel-cover"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = '/images/reelall.jpeg';
+                    }}
+                  />
                   <div className="reel-overlay">
                     <div className="play">▶</div>
                     <span>Watch on Instagram</span>

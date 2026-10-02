@@ -21,7 +21,7 @@ export default function Footer() {
             </Link>
             <p>Handmade Factory — blooming pipe cleaner stems, shimmering resin keepsakes &amp; personalized accessories, crafted with love.</p>
             <div className="socials">
-              <a href="https://www.instagram.com/handii.co_/" target="_blank" rel="noopener noreferrer" title="Instagram">IG</a>
+              <a href="https://www.instagram.com/handii.co/" target="_blank" rel="noopener noreferrer" title="Instagram">IG</a>
               <a href="https://wa.me/918847277218?text=Hi%20Handii%20Studio!%20%F0%9F%8C%B8%20I'd%20like%20to%20inquire%20about%20your%20handcrafted%20pieces." target="_blank" rel="noopener noreferrer" title="WhatsApp (+91 8847277218)">WA</a>
               <a href="#" title="Pinterest">P</a>
             </div>

@@ -80,6 +80,50 @@ export default function AdminDashboardPage() {
   const [editColorHex, setEditColorHex] = useState('#e8b4bc');
   const [editColorImg, setEditColorImg] = useState('');
 
+  // Newsletter Subscribers State
+  const [subscribers, setSubscribers] = useState([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [copiedSubscribers, setCopiedSubscribers] = useState(false);
+
+  // Helper: Normalize image URLs (fixes Windows backslashes, removes redundant public/, trims spaces)
+  function normalizeImageUrl(url) {
+    if (!url) return '';
+    let cleaned = String(url).trim().replace(/\\/g, '/');
+    if (cleaned.startsWith('public/')) {
+      cleaned = '/' + cleaned.slice(7);
+    } else if (cleaned.startsWith('images/')) {
+      cleaned = '/' + cleaned;
+    } else if (cleaned.startsWith('uploads/')) {
+      cleaned = '/' + cleaned;
+    }
+    return cleaned;
+  }
+
+  // Helper: Direct local file upload via /api/upload
+  async function uploadLocalPhoto(file, onUploaded) {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('photos', file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        onUploaded(data.url);
+      } else {
+        alert(data.message || 'Image upload failed');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upload image from your computer.');
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
   useEffect(() => {
     if (token && isAdmin) {
       loadAllAdminData();
@@ -101,12 +145,13 @@ export default function AdminDashboardPage() {
     setLoading(true);
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      const [ordRes, prodRes, custRes, comboRes, coupRes] = await Promise.all([
+      const [ordRes, prodRes, custRes, comboRes, coupRes, subRes] = await Promise.all([
         fetch('/api/orders/admin/all', { headers }),
         fetch('/api/products'),
         fetch('/api/custom-orders/admin/all', { headers }),
         fetch('/api/combos'),
-        fetch('/api/coupons', { headers })
+        fetch('/api/coupons', { headers }),
+        fetch('/api/newsletter/subscribers')
       ]);
 
       const ordData = await ordRes.json();
@@ -120,6 +165,11 @@ export default function AdminDashboardPage() {
       if (custData.success) setCustomOrders(custData.customOrders || []);
       if (comboData.success) setCombos(comboData.combos || []);
       if (coupData.success) setCoupons(coupData.coupons || []);
+
+      if (subRes.ok) {
+        const subData = await subRes.json();
+        if (subData.success) setSubscribers(subData.subscribers || []);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -176,11 +226,12 @@ export default function AdminDashboardPage() {
       alert('Please enter a color name (e.g. Pastel Rose)');
       return;
     }
+    const cleanVariantImg = normalizeImageUrl(newColorImg);
     const colorItem = {
       color: newColorName.trim(),
       style: `background: ${newColorHex}`,
       title: newColorName.trim(),
-      img: newColorImg.trim() || newImg.trim() || '/images/flowermain.jpeg'
+      img: cleanVariantImg || normalizeImageUrl(newImg) || '/images/flowermain.jpeg'
     };
     setNewColors((prev) => [...prev, colorItem]);
     setNewColorName('');
@@ -193,13 +244,14 @@ export default function AdminDashboardPage() {
 
   function handleAddPresetColor(preset) {
     if (newColors.some((c) => c.color.toLowerCase() === preset.name.toLowerCase())) return;
+    const cleanVariantImg = normalizeImageUrl(newColorImg);
     setNewColors((prev) => [
       ...prev,
       {
         color: preset.name,
         style: `background: ${preset.hex}`,
         title: preset.name,
-        img: newImg.trim() || '/images/flowermain.jpeg'
+        img: cleanVariantImg || normalizeImageUrl(newImg) || '/images/flowermain.jpeg'
       }
     ]);
   }
@@ -210,6 +262,11 @@ export default function AdminDashboardPage() {
     try {
       const numPrice = parseInt(String(newPrice).replace(/[^0-9]/g, ''), 10) || 150;
       const cost = newCostPrice ? parseInt(newCostPrice, 10) : Math.round(numPrice * 0.45);
+      const cleanPrimaryImg = normalizeImageUrl(newImg) || '/images/flowermain.jpeg';
+      const finalizedColors = newColors.map((c) => ({
+        ...c,
+        img: normalizeImageUrl(c.img) || cleanPrimaryImg
+      }));
 
       const res = await fetch('/api/products', {
         method: 'POST',
@@ -224,9 +281,9 @@ export default function AdminDashboardPage() {
           cat: newCat,
           sub: newSub || 'all',
           badge: newBadge || null,
-          img: newImg.trim() || '/images/flowermain.jpeg',
+          img: cleanPrimaryImg,
           stockCount: parseInt(newStock, 10) || 10,
-          colors: newColors
+          colors: finalizedColors
         })
       });
       const data = await res.json();
@@ -254,13 +311,23 @@ export default function AdminDashboardPage() {
     if (!editingProduct) return;
 
     try {
+      const cleanPrimaryImg = normalizeImageUrl(editingProduct.img) || '/images/flowermain.jpeg';
+      const updatedProduct = {
+        ...editingProduct,
+        img: cleanPrimaryImg,
+        colors: (editingProduct.colors || []).map((c) => ({
+          ...c,
+          img: normalizeImageUrl(c.img) || cleanPrimaryImg
+        }))
+      };
+
       const res = await fetch(`/api/products/${editingProduct.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(editingProduct)
+        body: JSON.stringify(updatedProduct)
       });
       const data = await res.json();
       if (data.success) {
@@ -299,11 +366,12 @@ export default function AdminDashboardPage() {
   // Add Color to Editing Product
   function handleAddColorSwatch() {
     if (!editColorName.trim() || !editingProduct) return;
+    const cleanVariantImg = normalizeImageUrl(editColorImg);
     const newColor = {
       color: editColorName.trim(),
       title: editColorName.trim(),
       style: `background: ${editColorHex || '#f8bbd0'}`,
-      img: editColorImg.trim() || editingProduct.img || '/images/flowermain.jpeg'
+      img: cleanVariantImg || normalizeImageUrl(editingProduct.img) || '/images/flowermain.jpeg'
     };
 
     setEditingProduct({
@@ -321,11 +389,12 @@ export default function AdminDashboardPage() {
     if ((editingProduct.colors || []).some((c) => c.color.toLowerCase() === preset.name.toLowerCase())) {
       return;
     }
+    const cleanVariantImg = normalizeImageUrl(editColorImg);
     const newColor = {
       color: preset.name,
       title: preset.name,
       style: `background: ${preset.hex}`,
-      img: editingProduct.img || '/images/flowermain.jpeg'
+      img: cleanVariantImg || normalizeImageUrl(editingProduct.img) || '/images/flowermain.jpeg'
     };
     setEditingProduct({
       ...editingProduct,
@@ -581,8 +650,8 @@ export default function AdminDashboardPage() {
     }
   }
 
-  const [gateEmail, setGateEmail] = useState('admin@handii.co');
-  const [gatePassword, setGatePassword] = useState('admin123');
+  const [gateEmail, setGateEmail] = useState('');
+  const [gatePassword, setGatePassword] = useState('');
   const [gateLoading, setGateLoading] = useState(false);
   const [gateError, setGateError] = useState('');
 
@@ -638,20 +707,7 @@ export default function AdminDashboardPage() {
             </button>
           </form>
 
-          <div className="gate-helper-strip">
-            <span>Quick Studio Demo Access:</span>
-            <button
-              type="button"
-              className="demo-chip"
-              onClick={() => {
-                setGateEmail('admin@handii.co');
-                setGatePassword('admin123');
-                handleGateLogin();
-              }}
-            >
-              ⚡ Instant 1-Click Admin Login (admin@handii.co)
-            </button>
-          </div>
+
         </div>
       </div>
     );
@@ -767,6 +823,13 @@ export default function AdminDashboardPage() {
           onClick={() => setActiveTab('coupons')}
         >
           🎟️ Promo Coupons ({coupons.length})
+        </button>
+        <button
+          type="button"
+          className={`adm-tab ${activeTab === 'subscribers' ? 'active' : ''}`}
+          onClick={() => setActiveTab('subscribers')}
+        >
+          💌 Drop Subscribers ({subscribers.length})
         </button>
       </div>
 
@@ -989,7 +1052,16 @@ export default function AdminDashboardPage() {
             {filteredProducts.map((p) => (
               <div className="admin-product-card" key={p.id}>
                 <div className="prod-head-row">
-                  <img src={p.img} alt={p.title} className="admin-prod-thumb" />
+                  <img
+                    src={p.img || '/images/flowermain.jpeg'}
+                    alt={p.title}
+                    className="admin-prod-thumb"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = '/images/flowermain.jpeg';
+                    }}
+                  />
                   <div className="admin-prod-meta">
                     <h4>{p.title}</h4>
                     <span className="tag-cat">
@@ -1593,6 +1665,90 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
+      {/* Tab 7: Email Subscribers */}
+      {activeTab === 'subscribers' && (
+        <div className="admin-content-section">
+          <div className="list-head-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <h3>Early Drop &amp; Restock Subscribers ({subscribers.length}) 💌</h3>
+              <span className="info-subtext">Customers subscribed to receive artisan restock notifications and private drop alerts</span>
+            </div>
+            {subscribers.length > 0 && (
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  const emails = subscribers.map((s) => s.email).join(', ');
+                  navigator.clipboard.writeText(emails);
+                  setCopiedSubscribers(true);
+                  setTimeout(() => setCopiedSubscribers(false), 2500);
+                }}
+              >
+                {copiedSubscribers ? 'Copied Emails to Clipboard! ✓' : '📋 Copy All Emails'}
+              </button>
+            )}
+          </div>
+
+          {subscribers.length === 0 ? (
+            <div className="empty-state">
+              <span className="tag">No Subscribers Yet</span>
+              <p>When customers subscribe on the storefront newsletter form, their emails will appear here.</p>
+            </div>
+          ) : (
+            <div className="admin-table-container">
+              <table className="admin-orders-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Email Address</th>
+                    <th>Subscribed On</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subscribers.map((s, idx) => (
+                    <tr key={s.id || idx}>
+                      <td>{idx + 1}</td>
+                      <td><strong>{s.email}</strong></td>
+                      <td>
+                        {s.subscribedAt
+                          ? new Date(s.subscribedAt).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          : 'Recently'}
+                      </td>
+                      <td>
+                        <span className="order-status-pill shipped">VIP Active</span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="btn btn-rose btn-sm"
+                          style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                          title="Remove subscriber"
+                          onClick={async () => {
+                            if (!window.confirm(`Remove ${s.email} from drop alert list?`)) return;
+                            await fetch(`/api/newsletter/subscribers/${s.id}`, { method: 'DELETE' });
+                            setSubscribers((prev) => prev.filter((sub) => sub.id !== s.id));
+                          }}
+                        >
+                          ✕ Remove
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Add Product Modal (Revamped with Color Options & Live Storefront Preview) */}
       {showAddProductModal && (
         <div className="modal-overlay" onClick={() => setShowAddProductModal(false)}>
@@ -1752,10 +1908,22 @@ export default function AdminDashboardPage() {
                     />
                     <input
                       type="text"
-                      placeholder="Variant Image (Optional)"
+                      placeholder="Variant Image (URL or uploaded file)"
                       value={newColorImg}
-                      onChange={(e) => setNewColorImg(e.target.value)}
+                      onChange={(e) => setNewColorImg(normalizeImageUrl(e.target.value))}
                     />
+                    <label className="admin-file-upload-btn" title="Choose local image file for this color">
+                      📁 Photo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) uploadLocalPhoto(file, (url) => setNewColorImg(url));
+                        }}
+                      />
+                    </label>
                     <button
                       type="button"
                       className="btn btn-primary btn-sm"
@@ -1793,15 +1961,30 @@ export default function AdminDashboardPage() {
 
                 {/* 4. Imagery */}
                 <div className="form-sub-section">
-                  <span className="section-legend">🖼️ 4. Primary Product Photo</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                    <span className="section-legend" style={{ margin: 0 }}>🖼️ 4. Primary Product Photo</span>
+                    <label className="admin-file-upload-btn">
+                      📁 Choose File from PC
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) uploadLocalPhoto(file, (url) => setNewImg(url));
+                        }}
+                      />
+                    </label>
+                  </div>
                   <div className="form-group">
-                    <label>Image URL Path</label>
+                    <label>Image URL Path (or choose local file from PC above)</label>
                     <input
                       type="text"
-                      placeholder="e.g. /images/flowermain.jpeg"
+                      placeholder="e.g. /images/flowermain.jpeg, /uploads/..., or https://..."
                       value={newImg}
-                      onChange={(e) => setNewImg(e.target.value)}
+                      onChange={(e) => setNewImg(normalizeImageUrl(e.target.value))}
                     />
+                    {uploadingImage && <small className="info-subtext" style={{ color: 'var(--gold-deep)' }}>Uploading local photo to studio server... ⏳</small>}
                   </div>
                   <div className="sample-img-chips">
                     <span className="info-subtext mr-2">Quick Studio Samples:</span>
@@ -1836,6 +2019,11 @@ export default function AdminDashboardPage() {
                     <img
                       src={newImg.trim() || '/images/flowermain.jpeg'}
                       alt={newTitle || 'Handcrafted preview'}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '/images/flowermain.jpeg';
+                      }}
                     />
                     {newBadge && <span className="mockup-badge">{newBadge}</span>}
                   </div>
@@ -2052,10 +2240,22 @@ export default function AdminDashboardPage() {
                     />
                     <input
                       type="text"
-                      placeholder="Variant Image (Optional)"
+                      placeholder="Variant Image (URL or uploaded file)"
                       value={editColorImg}
-                      onChange={(e) => setEditColorImg(e.target.value)}
+                      onChange={(e) => setEditColorImg(normalizeImageUrl(e.target.value))}
                     />
+                    <label className="admin-file-upload-btn" title="Choose local image file for this color">
+                      📁 Photo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) uploadLocalPhoto(file, (url) => setEditColorImg(url));
+                        }}
+                      />
+                    </label>
                     <button
                       type="button"
                       className="btn btn-primary btn-sm"
@@ -2093,14 +2293,30 @@ export default function AdminDashboardPage() {
 
                 {/* 4. Product Image */}
                 <div className="form-sub-section">
-                  <span className="section-legend">🖼️ 4. Primary Product Photo</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                    <span className="section-legend" style={{ margin: 0 }}>🖼️ 4. Primary Product Photo</span>
+                    <label className="admin-file-upload-btn">
+                      📁 Choose File from PC
+                      <input
+                        type="file"
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) uploadLocalPhoto(file, (url) => setEditingProduct({ ...editingProduct, img: url }));
+                        }}
+                      />
+                    </label>
+                  </div>
                   <div className="form-group">
-                    <label>Image URL Path</label>
+                    <label>Image URL Path (or choose local file from PC above)</label>
                     <input
                       type="text"
+                      placeholder="e.g. /images/flowermain.jpeg, /uploads/..., or https://..."
                       value={editingProduct.img || ''}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, img: e.target.value })}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, img: normalizeImageUrl(e.target.value) })}
                     />
+                    {uploadingImage && <small className="info-subtext" style={{ color: 'var(--gold-deep)' }}>Uploading local photo... ⏳</small>}
                   </div>
                   <div className="sample-img-chips">
                     <span className="info-subtext mr-2">Quick Studio Samples:</span>
@@ -2152,6 +2368,11 @@ export default function AdminDashboardPage() {
                     <img
                       src={editingProduct.img || '/images/flowermain.jpeg'}
                       alt={editingProduct.title}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = '/images/flowermain.jpeg';
+                      }}
                     />
                     {editingProduct.badge && <span className="mockup-badge">{editingProduct.badge}</span>}
                   </div>

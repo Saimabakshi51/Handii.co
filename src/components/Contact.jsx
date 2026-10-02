@@ -2,14 +2,45 @@ import { useState } from 'react';
 
 export default function Contact() {
   const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState(null); // { type: 'success' | 'info' | 'error', text: string }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!email) return;
-    setSubscribed(true);
-    setEmail('');
-    setTimeout(() => setSubscribed(false), 4000);
+    if (!email || loading) return;
+    setLoading(true);
+    setFeedback(null);
+
+    try {
+      const res = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setEmail('');
+        setFeedback({
+          type: data.alreadySubscribed ? 'info' : 'success',
+          text: data.message || "✨ Welcome to the handii.co family! You'll be the first to know about new craft drops."
+        });
+        setTimeout(() => setFeedback(null), 6000);
+      } else {
+        setFeedback({
+          type: 'error',
+          text: data.message || 'Could not subscribe right now. Please try again.'
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      setFeedback({
+        type: 'error',
+        text: 'Network connection error. Please try again in a moment.'
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -35,24 +66,31 @@ export default function Contact() {
           </a>
         </div>
 
-        {subscribed ? (
-          <div className="newsletter-success-chip">
-            ✨ Welcome to the handii.co family! You'll be the first to know about new craft drops.
+        {feedback && (
+          <div
+            className="newsletter-success-chip"
+            style={{
+              borderColor: feedback.type === 'error' ? 'var(--rose)' : feedback.type === 'info' ? 'var(--gold-deep)' : 'var(--sage)',
+              color: feedback.type === 'error' ? '#c2410c' : 'var(--ink)'
+            }}
+          >
+            {feedback.text}
           </div>
-        ) : (
-          <form className="cta-form" onSubmit={handleSubmit}>
-            <input
-              type="email"
-              placeholder="Enter your email for drop alerts (e.g. name@example.com)"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <button type="submit" className="btn btn-gold">
-              Subscribe 💌
-            </button>
-          </form>
         )}
+
+        <form className="cta-form" onSubmit={handleSubmit} style={{ marginTop: feedback ? '14px' : '0' }}>
+          <input
+            type="email"
+            placeholder="Enter your email for drop alerts (e.g. name@example.com)"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+            required
+          />
+          <button type="submit" className="btn btn-gold" disabled={loading}>
+            {loading ? 'Subscribing... ⏳' : 'Subscribe 💌'}
+          </button>
+        </form>
       </div>
     </section>
   );

@@ -1,20 +1,38 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+
+function getInitialColorIndex(p) {
+  if (!p || !p.colors || p.colors.length === 0) return 0;
+  const found = p.colors.findIndex((c) => c.active);
+  return found !== -1 ? found : 0;
+}
+
+function getImageForColor(p, idx) {
+  if (!p) return '/images/flowermain.jpeg';
+  if (p.colors && p.colors[idx]?.img && p.colors[idx].img.trim()) {
+    return p.colors[idx].img.trim();
+  }
+  return p.img || '/images/flowermain.jpeg';
+}
 
 export default function ProductCard({ product, onOpenReviews }) {
   const { addToCart, updateProductQuantity, getItemQuantity } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
 
-  const [activeColorIdx, setActiveColorIdx] = useState(
-    product.colors && product.colors.findIndex((c) => c.active) !== -1
-      ? product.colors.findIndex((c) => c.active)
-      : 0
-  );
-  const [displayImg, setDisplayImg] = useState(product.img);
+  const [activeColorIdx, setActiveColorIdx] = useState(() => getInitialColorIndex(product));
+  const [displayImg, setDisplayImg] = useState(() => getImageForColor(product, getInitialColorIndex(product)));
   const [imgOpacity, setImgOpacity] = useState(1);
   const [added, setAdded] = useState(false);
   const timeoutRef = useRef(null);
+
+  // Sync state whenever product props change (e.g. category filter, search, admin edit)
+  useEffect(() => {
+    const idx = getInitialColorIndex(product);
+    setActiveColorIdx(idx);
+    setDisplayImg(getImageForColor(product, idx));
+    setImgOpacity(1);
+  }, [product.id, product.img, product.colors]);
 
   const activeColor = product.colors && product.colors[activeColorIdx];
   const activeColorName = activeColor ? activeColor.color : 'As Pictured';
@@ -27,11 +45,11 @@ export default function ProductCard({ product, onOpenReviews }) {
 
   function handleSelectColor(idx) {
     setActiveColorIdx(idx);
-    const newImg = product.colors[idx]?.img;
-    if (newImg && newImg !== displayImg) {
+    const targetImg = getImageForColor(product, idx);
+    if (targetImg !== displayImg) {
       setImgOpacity(0);
       window.setTimeout(() => {
-        setDisplayImg(newImg);
+        setDisplayImg(targetImg);
         setImgOpacity(1);
       }, 150);
     }
@@ -65,14 +83,23 @@ export default function ProductCard({ product, onOpenReviews }) {
 
   function handleNotify() {
     alert(
-      `Thanks for your interest in "${product.title}"! We have marked your alert and will announce restocks on Instagram @handii.co_! 🌸`
+      `Thanks for your interest in "${product.title}"! We have marked your alert and will announce restocks on Instagram @handii.co! 🌸`
     );
   }
 
   return (
     <div className="prod-card" data-cat={product.cat} data-sub={product.sub}>
       <div className="imgwrap">
-        <img src={displayImg} alt={product.alt || product.title} style={{ opacity: imgOpacity }} />
+        <img
+          src={displayImg}
+          alt={product.alt || product.title}
+          style={{ opacity: imgOpacity }}
+          referrerPolicy="no-referrer"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = '/images/flowermain.jpeg';
+          }}
+        />
 
         {/* Badges */}
         {isOut ? (
@@ -112,16 +139,21 @@ export default function ProductCard({ product, onOpenReviews }) {
         {product.colors && product.colors.length > 0 && (
           <div className="color-row">
             <span className="color-label">Colour:</span>
-            {product.colors.map((c, idx) => (
-              <button
-                key={idx}
-                className={'color-dot' + (idx === activeColorIdx ? ' active' : '')}
-                style={parseInlineStyle(c.style)}
-                data-color={c.color}
-                title={c.title}
-                onClick={() => handleSelectColor(idx)}
-              />
-            ))}
+            {product.colors.map((c, idx) => {
+              const swatchStyle = getColorStyle(c);
+              const colorTitle = c.color || c.title || c.name || `Color ${idx + 1}`;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  className={'color-dot' + (idx === activeColorIdx ? ' active' : '')}
+                  style={swatchStyle}
+                  data-color={colorTitle}
+                  title={colorTitle}
+                  onClick={() => handleSelectColor(idx)}
+                />
+              );
+            })}
           </div>
         )}
 
@@ -160,8 +192,23 @@ export default function ProductCard({ product, onOpenReviews }) {
   );
 }
 
+function getColorStyle(c) {
+  if (!c) return { background: '#e3ae49' };
+  if (c.style) {
+    const parsed = parseInlineStyle(c.style);
+    if (parsed && (parsed.background || parsed.backgroundColor)) return parsed;
+  }
+  if (c.hex) {
+    return { background: c.hex.startsWith('#') ? c.hex : `#${c.hex}` };
+  }
+  if (c.color) {
+    return { background: c.color };
+  }
+  return { background: '#e3ae49' };
+}
+
 function parseInlineStyle(styleStr) {
-  if (!styleStr) return undefined;
+  if (!styleStr) return {};
   const result = {};
   styleStr.split(';').forEach((rule) => {
     const [prop, ...rest] = rule.split(':');

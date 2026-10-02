@@ -3,7 +3,7 @@ export default function About() {
     <section className="section" id="about">
       <div className="wrap about">
         <div className="imgwrap">
-          <img src="/images/WhatsApp Image 2026-07-28 at 09.50.41.jpeg" alt="Handmade pipe cleaner mushrooms" />
+          <img src="/images/together.jpg" alt="Handii handmade crafts and artisans" />
         </div>
         <div>
           <span className="tag">our story</span>

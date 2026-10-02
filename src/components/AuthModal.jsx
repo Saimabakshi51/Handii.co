@@ -128,12 +128,7 @@ export default function AuthModal() {
     }
   }
 
-  function handleFillAdmin() {
-    setEmail('admin@handii.co');
-    setPassword('admin123');
-    setError('');
-    setAuthModalMode('login');
-  }
+
 
   return (
     <div className="modal-overlay" onClick={closeAuthModal}>
@@ -317,13 +312,7 @@ export default function AuthModal() {
           </button>
         </form>
 
-        {/* Clean 1 Admin Quick Access (Only 1 admin credential, all demo customers removed) */}
-        <div className="demo-accounts-strip">
-          <span>Admin Access:</span>
-          <button type="button" className="demo-chip" onClick={handleFillAdmin}>
-            🛡️ Studio Admin (admin@handii.co)
-          </button>
-        </div>
+
 
         <div className="auth-footer-toggle">
           {authModalMode === 'register' ? (

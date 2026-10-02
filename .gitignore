@@ -1,2 +1,13 @@
 node_modules
 dist
+.env
+.env.local
+*.msi
+*.exe
+*.zip
+*.docx
+*.pptx
+*.HEIC
+handii logo/
+reports(old+new)/
+server/data/db.backup.json

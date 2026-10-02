@@ -156,7 +156,7 @@ d:/handii-react/handii-react/
 - **Location**: `src/components/About.jsx`
 - **Role**: Brand storytelling & authenticity showcase.
 - **Features**:
-  - Feature image (`/images/WhatsApp Image 2026-07-28 at 09.50.41.jpeg`).
+  - Feature image (`/images/together.jpg`).
   - Brand narrative explaining handmade philosophy.
   - Metrics row: `100% Handmade`, `5+ Craft techniques`, `1:1 Custom orders`.
 

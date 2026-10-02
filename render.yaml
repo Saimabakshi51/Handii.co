@@ -1,0 +1,26 @@
+# Render.com Blueprint Deployment Configuration
+# Visit https://render.com -> New -> Blueprint -> connect this repository
+
+services:
+  - type: web
+    name: handii-backend
+    env: node
+    plan: free
+    region: singapore # or oregon, frankfurt, etc.
+    buildCommand: npm install
+    startCommand: node server/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGO_URI
+        sync: false # Set this in Render dashboard to your MongoDB Atlas connection string
+      - key: RESEND_API_KEY
+        sync: false # Your Resend API key for automated emails
+      - key: REPLY_TO_EMAIL
+        value: handii.co@yahoo.com
+      - key: FRONTEND_URL
+        sync: false # Set to your Netlify site URL (e.g. https://handii.netlify.app)

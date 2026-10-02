@@ -1,0 +1,26 @@
+# Netlify Production Configuration for handii.co
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# 1. API Reverse Proxy: Forwards all /api calls to your online backend server.
+# Change the URL below to your actual online backend URL (e.g. from Render or Railway).
+[[redirects]]
+  from = "/api/*"
+  to = "https://handii-backend.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# 2. Uploads Reverse Proxy: Forwards photo uploads to the online backend.
+[[redirects]]
+  from = "/uploads/*"
+  to = "https://handii-backend.onrender.com/uploads/:splat"
+  status = 200
+  force = true
+
+# 3. Client-side Routing Fallback for React Router (Single Page Application)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

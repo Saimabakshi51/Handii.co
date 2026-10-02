@@ -4544,4 +4544,73 @@ button, .btn {
   }
 }
 
+/* ==========================================================================
+   ADMIN FILE UPLOAD BUTTON & SUBSCRIBERS TABLE
+   ========================================================================== */
+.admin-file-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--paper);
+  border: 1.5px dashed var(--gold);
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.admin-file-upload-btn:hover {
+  background: #fff;
+  border-color: var(--gold-deep);
+  color: var(--gold-deep);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(227, 174, 73, 0.2);
+}
+
+.admin-table-container {
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  overflow-x: auto;
+  box-shadow: 0 6px 20px rgba(30, 58, 63, 0.05);
+}
+
+.admin-orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  text-align: left;
+}
+
+.admin-orders-table th {
+  background: rgba(30, 58, 63, 0.04);
+  padding: 14px 18px;
+  font-weight: 600;
+  color: var(--ink);
+  border-bottom: 1.5px solid var(--line);
+  font-size: 0.84rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-orders-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  vertical-align: middle;
+}
+
+.admin-orders-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-orders-table tr:hover td {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+
 
